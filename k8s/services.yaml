@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: patient-service, namespace: medcareai}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: patient-service}}
+  template:
+    metadata: {labels: {app: patient-service}}
+    spec:
+      securityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: patient-service
+          image: ghcr.io/abhijeet9066-hub/medcareai-cloud-native-microservices/patient:latest
+          ports: [{name: http, containerPort: 8000}]
+          resources: {requests: {cpu: 100m, memory: 96Mi}, limits: {cpu: 500m, memory: 256Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: ["ALL"]}}
+          readinessProbe: {httpGet: {path: /readyz, port: http}, initialDelaySeconds: 3, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /healthz, port: http}, initialDelaySeconds: 10, periodSeconds: 10}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: patient-service, namespace: medcareai}
+spec:
+  selector: {app: patient-service}
+  ports: [{name: http, port: 8000, targetPort: http}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: appointment-service, namespace: medcareai}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: appointment-service}}
+  template:
+    metadata: {labels: {app: appointment-service}}
+    spec:
+      securityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: appointment-service
+          image: ghcr.io/abhijeet9066-hub/medcareai-cloud-native-microservices/appointment:latest
+          ports: [{name: http, containerPort: 8000}]
+          envFrom: [{configMapRef: {name: medcareai-config}}]
+          resources: {requests: {cpu: 100m, memory: 96Mi}, limits: {cpu: 500m, memory: 256Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: ["ALL"]}}
+          readinessProbe: {httpGet: {path: /readyz, port: http}, initialDelaySeconds: 3, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /healthz, port: http}, initialDelaySeconds: 10, periodSeconds: 10}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: appointment-service, namespace: medcareai}
+spec:
+  selector: {app: appointment-service}
+  ports: [{name: http, port: 8000, targetPort: http}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: api-gateway, namespace: medcareai}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: api-gateway}}
+  template:
+    metadata: {labels: {app: api-gateway}}
+    spec:
+      securityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: gateway
+          image: ghcr.io/abhijeet9066-hub/medcareai-cloud-native-microservices/gateway:latest
+          ports: [{name: http, containerPort: 8000}]
+          envFrom: [{configMapRef: {name: medcareai-config}}]
+          resources: {requests: {cpu: 100m, memory: 96Mi}, limits: {cpu: 500m, memory: 256Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: ["ALL"]}}
+          readinessProbe: {httpGet: {path: /readyz, port: http}, initialDelaySeconds: 3, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /healthz, port: http}, initialDelaySeconds: 10, periodSeconds: 10}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: api-gateway, namespace: medcareai}
+spec:
+  selector: {app: api-gateway}
+  ports: [{name: http, port: 80, targetPort: http}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: audit-worker, namespace: medcareai}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: audit-worker}}
+  template:
+    metadata: {labels: {app: audit-worker}}
+    spec:
+      securityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: audit-worker
+          image: ghcr.io/abhijeet9066-hub/medcareai-cloud-native-microservices/audit-worker:latest
+          envFrom: [{configMapRef: {name: medcareai-config}}]
+          resources: {requests: {cpu: 50m, memory: 64Mi}, limits: {cpu: 250m, memory: 128Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: ["ALL"]}}

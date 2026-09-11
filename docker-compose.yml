@@ -1,0 +1,25 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  patient-service:
+    build: ./services/patient
+    ports: ["8001:8000"]
+  appointment-service:
+    build: ./services/appointment
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on: [redis]
+    ports: ["8002:8000"]
+  audit-worker:
+    build: ./services/audit_worker
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on: [redis]
+  gateway:
+    build: ./services/gateway
+    environment:
+      PATIENT_SERVICE_URL: http://patient-service:8000
+      APPOINTMENT_SERVICE_URL: http://appointment-service:8000
+    depends_on: [patient-service, appointment-service]
+    ports: ["8080:8000"]

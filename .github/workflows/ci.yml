@@ -1,0 +1,21 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements-dev.txt -r services/patient/requirements.txt -r services/appointment/requirements.txt -r services/gateway/requirements.txt
+      - run: python -m pytest -q services/patient/tests services/appointment/tests services/gateway/tests
+      - name: Validate Kubernetes YAML
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+          for p in Path('k8s').glob('*.yaml'):
+              list(yaml.safe_load_all(p.read_text()))
+              print('validated', p)
+          PY
+      - run: python -m compileall -q services scripts
