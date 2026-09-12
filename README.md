@@ -6,7 +6,7 @@ A portfolio-grade **Kubernetes + Docker + FastAPI microservices** project demons
 
 ## Portfolio positioning
 
-> Built a four-service cloud-native healthcare workflow reference platform supporting the broader MedCareAI clinical product architecture.
+> Built a four-service cloud-native healthcare workflow reference platform supporting the broader MedCareAI product architecture.
 
 The project demonstrates **Kubernetes deployment configurations, Redis Streams event processing and GitHub Actions CI validation** without claiming a verified live production Kubernetes deployment.
 
@@ -86,7 +86,7 @@ All names and identifiers in the demo are synthetic. There is no diagnosis, pres
 
 ## CV-ready summary
 
-Built a four-service cloud-native healthcare workflow reference platform supporting the broader MedCareAI clinical product architecture, with Kubernetes deployment configurations, Redis Streams event processing and GitHub Actions CI validation.
+Built a four-service cloud-native healthcare workflow reference platform supporting the broader MedCareAI product architecture, with Kubernetes deployment configurations, Redis Streams event processing and GitHub Actions CI validation.
 
 ## License
 
